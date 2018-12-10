@@ -1,18 +1,18 @@
 EPIC,fund_period,fund_power,sig_period,sig_power,sec_period,sec_power,num_sig,harm_type,threshold,SpotEvol,MultiProt,Q,Q2,Q3,Neighbor,Blended,ImgProblem,Notes,Notes – neighbors
 210491860,15.1794,0.823,15.1794,0.823,7.4563,0.0462,0,half,0.007638,y,n,0,2,-,y,y,n,,
-210551925,11.6936,0.7201,11.6936,0.7201,5.9737,0.0824,0,half,0.007968,y,n,0,2,-,m,m,n,,2MASS ghosts?
+210551925,11.6936,0.7201,11.6936,0.7201,5.9737,0.0824,0,half,0.007968,y,n,0,2,-,n,n,n,,2MASS glint artifacts
 210552148,38.5569,0.4026,38.5569,0.4026,-9999,-9999,0,-,0.008936,n,n,0,2,-,y,m,n,,"comparable brightness, almost overlapping PSFs"
-210554781,11.5143,0.6523,11.5143,0.6523,3.5983,0.1675,3,-,0.008142,y,y,0,0,2,m,m,n,,2MASS ghosts?
+210554781,11.5143,0.6523,11.5143,0.6523,3.5983,0.1675,3,-,0.008142,y,y,0,0,2,n,n,n,,2MASS glint artifacts
 210558541,0.9041,0.5218,0.9041,0.5218,0.4522,0.0991,1,half,0.007559,y,n,0,2,-,y,y,n,,"DSS extended, nothing in 2MASS"
-210566619,13.1814,0.4329,13.1814,0.4329,6.8292,0.1614,1,half,0.00779,y,m,1,2,-,y,m,n,"Clear double-dip in second half of campaign, but lots of evolution in first half so phasing isn't great","faint in 2MASS, 2MASS ghosts?"
+210566619,13.1814,0.4329,13.1814,0.4329,6.8292,0.1614,1,half,0.00779,y,m,1,2,-,y,m,n,"Clear double-dip in second half of campaign, but lots of evolution in first half so phasing isn't great","faint in 2MASS, plus 2MASS glint artifacts "
 210596446,14.5192,0.6478,14.5192,0.6478,7.1887,0.0224,0,half,0.007592,y,n,0,2,-,y,n,n,,
 210640966,2.7166,0.4664,2.7166,0.4664,44.2338,0.0609,2,-,0.008273,y,n,0,2,2,n,n,n,Strong beat pattern (differential rotation); P3 looks like noise,
-210651981,2.4486,0.8716,2.4486,0.8716,1.0718,0.0769,2,-,0.008985,m,m,0,1,2,y,y,n,"P2 has such low power I'm inclined to ignore it, but it phases really clearly",faint close neighbor
+210651981,2.4486,0.8716,2.4486,0.8716,1.0718,0.0769,2,-,0.008985,m,m,0,1,2,y,y,n,"P2 has such low power I'm inclined to ignore it, but it phases really clearly","faint close neighbor, plus 2MASS glint artifacts "
 210652965,10.1869,0.6519,10.1869,0.6519,5.0841,0.1537,1,half,0.007862,y,n,0,2,-,y,n,y,Single spot pattern,background problem in TPF
-210666330,10.6945,0.2669,10.6945,0.2669,4.8385,0.0583,0,half,0.009179,y,n,1,2,-,y,y,n,"Double-dip repeats over several cycles, but loses all clarity in second half of campaign",
+210666330,10.6945,0.2669,10.6945,0.2669,4.8385,0.0583,0,half,0.009179,y,n,1,2,-,y,y,n,"Double-dip repeats over several cycles, but loses all clarity in second half of campaign",plus 2MASS glint artifacts
 210667985,17.374,0.0036,-9999,-9999,-9999,-9999,0,-,0.004842,-,-,3,-,-,n,n,y,noise,background problem in TPF
 210674207,0.9837,0.003,-9999,-9999,-9999,-9999,0,-,0.006736,-,-,3,-,-,n,n,n,Visible 1-day periods in white noise (not time-dep); not detected though,
-210709514,10.9678,0.7849,10.9678,0.7849,5.4532,0.1322,1,half,0.00753,y,n,0,2,-,m,m,n,,2MASS ghosts?
+210709514,10.9678,0.7849,10.9678,0.7849,5.4532,0.1322,1,half,0.00753,y,n,0,2,-,m,m,n,,2MASS glint artifacts
 210718930,2.4132,0.7109,2.4132,0.7109,1.2076,0.0289,0,half,0.007612,n,n,0,2,-,n,n,n,,
 210721261,1.5415,0.8964,1.5415,0.8964,0.7705,0.0156,0,half,0.008115,n,n,0,2,-,n,n,n,,
 210726910,3.2981,0.5455,3.2981,0.5455,1.6427,0.1942,2,half,0.007751,y,n,0,2,2,n,n,n,,
@@ -29,7 +29,7 @@ EPIC,fund_period,fund_power,sig_period,sig_power,sec_period,sec_power,num_sig,ha
 210878579,35.8001,0.2092,35.8001,0.2092,0.1824,0.0339,3,-,0.008305,n,n,2,1,2,n,n,n,"very noisy, P2 or P3 could be the real period",
 210889984,70,0.3985,11.5143,0.2816,5.9033,0.1169,0,half,0.007666,y,n,0,2,-,m,m,n,,"fainter neighbor along diffraction spike in DSS, nothing in 2MASS"
 210899231,1.2253,0.5188,1.2253,0.5188,51.8711,0.0291,3,-,0.007687,y,n,0,2,2,n,n,n,,
-210899260,59.002,0.3635,59.002,0.3635,9.1339,0.181,2,-,0.008171,y,n,2,0,2,y,y,n,,
+210899260,59.002,0.3635,59.002,0.3635,9.1339,0.181,2,-,0.008171,y,n,2,0,2,y,y,n,,plus 2MASS glint artifacts
 210923016,62.6959,0.0634,62.6959,0.0634,0.5786,0.0357,2,-,0.006329,y,n,2,1,2,n,n,n,Either P2 or P3 could be the true period; P3 shows more phase drift but they have almost equal power,
 210945848,13.0102,0.598,13.0102,0.598,6.462,0.2428,2,half,0.007717,y,n,0,2,2,y,y,n,,
 210949810,21.9422,0.3206,21.9422,0.3206,-9999,-9999,0,-,0.006602,n,n,0,-,-,y,y,n,,
@@ -46,31 +46,31 @@ EPIC,fund_period,fund_power,sig_period,sig_power,sec_period,sec_power,num_sig,ha
 246768912,43.592,0.289,43.592,0.289,0.5725,0.1446,1,-,0.007944,n,n,2,0,-,y,y,n,,
 246777832,12.8985,0.5951,12.8985,0.5951,6.7222,0.2526,1,half,0.009301,y,n,0,2,-,m,n,n,,
 246787471,7.4935,0.2329,7.4935,0.2329,0.4307,0.114,3,-,0.00863,y,y,0,0,2,y,n,n,P2 is clearly visible in full light curve overtop of P1,
-246794704,10.4709,0.5126,10.4709,0.5126,4.7845,0.3345,0,half-maybe,0.008885,y,n,1,2,-,y,m,n,Significant spot evolution so P1 is close but doesn't phase completely,faint neighbor near edge of PSF; 2MASS ghosts?
+246794704,10.4709,0.5126,10.4709,0.5126,4.7845,0.3345,0,half-maybe,0.008885,y,n,1,2,-,y,m,n,Significant spot evolution so P1 is close but doesn't phase completely,faint neighbor near edge of PSF; plus 2MASS glint artifacts 
 246806983,2.6103,0.7822,2.6103,0.7822,14.3117,0.0686,3,-,0.007952,n,y,0,1,2,y,n,n,"P2 is visible in the full lightcurve, underneath P1",
 246807491,1.5151,0.3673,1.5151,0.3673,25.0528,0.0802,3,-,0.008547,m,n,0,2,2,n,n,n,,
-246808055,9.1617,0.6246,9.1617,0.6246,4.5733,0.1849,0,half,0.008251,y,n,0,2,-,m,n,n,,2MASS ghosts?
+246808055,9.1617,0.6246,9.1617,0.6246,4.5733,0.1849,0,half,0.008251,y,n,0,2,-,y,n,n,,plus 2MASS glint artifacts
 246816464,0.3768,0.4213,0.3768,0.4213,0.7554,0.0999,0,dbl,0.008265,y,n,0,2,-,y,y,n,,
 246838465,70,0.2323,1.4472,0.1757,0.7243,0.0079,0,half,0.007639,y,n,0,2,-,n,n,n,,
 246846196,57.8656,0.1339,57.8656,0.1339,3.7094,0.066,1,-,0.007148,y,n,2,0,-,y,n,n,some phase drift,
 246862801,15.9872,0.7501,15.9872,0.7501,8.1435,0.0254,0,half,0.008561,y,n,0,2,-,y,n,n,,
 246863569,68.4061,0.0153,68.4061,0.0153,5.9266,0.0087,2,-,0.005969,y,n,2,1,2,y,y,n,phase drift and noisy,"slightly brighter neighbor, overlapping PSFs"
-246865157,12.2166,0.8983,12.2166,0.8983,6.1955,0.0374,0,half,0.00857,y,n,0,2,-,n,n,n,,2MASS ghosts?
-246875518,5.2438,0.5052,5.2438,0.5052,11.3404,0.2064,2,-,0.008318,y,n,2,1,-,y,n,n,Significant differential rotation; twice P1 is probably the real period,2MASS ghosts?
+246865157,12.2166,0.8983,12.2166,0.8983,6.1955,0.0374,0,half,0.00857,y,n,0,2,-,n,n,n,,2MASS glint artifacts
+246875518,5.2438,0.5052,5.2438,0.5052,11.3404,0.2064,2,-,0.008318,y,n,2,1,-,y,n,n,Significant differential rotation; twice P1 is probably the real period,2MASS glint artifacts
 246878254,5.8007,0.2879,5.8007,0.2879,13.4169,0.0896,3,-,0.007182,y,m,2,2,2,-,-,y,No way to tell what the real period is here,nothing in DSS
 246884081,1.2379,0.2711,1.2379,0.2711,34.1713,0.0303,2,-,0.007487,n,n,0,2,2,n,n,n,,
-246900928,9.8206,0.6297,9.8206,0.6297,4.8229,0.1061,1,half,0.007843,y,n,0,2,-,m,m,n,,2MASS ghosts?
+246900928,9.8206,0.6297,9.8206,0.6297,4.8229,0.1061,1,half,0.007843,y,n,0,2,-,n,n,n,,2MASS glint artifacts
 246911984,30.9981,0.0432,30.9981,0.0432,14.3802,0.0394,0,half-maybe,0.006674,n,n,0,2,-,y,n,n,,
 246928683,1.432,0.0622,1.432,0.0622,68.4061,0.0399,5,-,0.006563,y,n,0,2,2,m,n,n,,
-246931087,10.81,0.4323,10.81,0.4323,-9999,-9999,0,-,0.008506,n,n,0,-,-,y,y,y,,2MASS ghosts? And 2MASS image looks like it had stitching issues
+246931087,10.81,0.4323,10.81,0.4323,-9999,-9999,0,-,0.008506,n,n,0,-,-,y,y,y,,2MASS glint artifacts  And 2MASS image looks like it had stitching issues
 246953721,2.1218,0.1433,2.1218,0.1433,2.3129,0.0615,1,-,0.007335,y,y,0,0,-,m,m,n,Beat pattern; likely differential rotation,
 246953884,13.0102,0.5944,13.0102,0.5944,6.4759,0.2762,0,half,0.007374,y,n,0,2,-,n,n,n,,
 246971978,42.9685,0.4958,42.9685,0.4958,6.26,0.0095,1,-,0.008612,n,n,2,2,-,n,n,n,P2 has very low power and light curve is very noisy,
-246981320,38.5569,0.1509,38.5569,0.1509,1.0696,0.0909,1,-,0.007471,n,n,2,0,-,y,n,n,Long period doesn't phase; short period in white noise not time-dep,2MASS ghosts? One of the companions is only in DSS
+246981320,38.5569,0.1509,38.5569,0.1509,1.0696,0.0909,1,-,0.007471,n,n,2,0,-,y,n,n,Long period doesn't phase; short period in white noise not time-dep,plus 2MASS glint artifacts
 246984590,4.4913,0.6901,4.4913,0.6901,2.2505,0.0403,3,half,0.007814,n,y,0,2,1,y,y,n,P3 is possibly visible in the full light curve,multiple faint companions
 246990037,1.6888,0.0236,1.6888,0.0236,-9999,-9999,0,-,0.005445,n,n,0,-,-,-,-,y,,nothing in DSS
 246996958,12.2166,0.4595,12.2166,0.4595,5.8917,0.017,0,half,0.008022,m,n,0,2,-,n,n,n,,
-247002634,10.2215,0.6342,10.2215,0.6342,5.0414,0.1068,2,half,0.007815,y,n,0,2,2,y,y,n,,faint close neighbor
+247002634,10.2215,0.6342,10.2215,0.6342,5.0414,0.1068,2,half,0.007815,y,n,0,2,2,y,y,n,,faint close neighbor plus 2MASS glint artifacts 
 247013709,24.6418,0.7317,24.6418,0.7317,-9999,-9999,0,-,0.007583,n,n,0,-,-,y,y,n,,faint blended neighbor only in DSS
 247019334,1.6965,0.8822,1.6965,0.8822,-9999,-9999,0,-,0.007697,n,n,0,-,-,y,y,n,,
 247032724,0.7988,0.5421,0.7988,0.5421,-9999,-9999,0,-,0.00844,n,n,0,-,-,n,n,n,,
@@ -79,7 +79,7 @@ EPIC,fund_period,fund_power,sig_period,sig_power,sec_period,sec_power,num_sig,ha
 247094343,21.9422,0.5538,21.9422,0.5538,10.0505,0.0423,0,half,0.007238,y,n,0,2,-,n,n,n,,
 247110096,4.7467,0.794,4.7467,0.794,2.377,0.0348,1,half,0.00749,n,n,0,2,-,n,n,n,,
 247122957,1.5455,0.8339,1.5455,0.8339,0.7731,0.0389,1,half,0.007251,y,n,0,2,-,n,n,n,,
-247134293,11.7853,0.7087,11.7853,0.7087,5.8345,0.1264,1,half,0.007764,y,n,0,2,-,y,n,n,,
+247134293,11.7853,0.7087,11.7853,0.7087,5.8345,0.1264,1,half,0.007764,y,n,0,2,-,y,n,n,,plus 2MASS glint artifacts
 247139505,18.4405,0.938,18.4405,0.938,9.1062,0.0342,0,half,0.008182,n,n,0,2,-,y,m,n,,
 247144105,13.0668,0.3827,13.0668,0.3827,6.6479,0.0685,0,half,0.007968,y,n,0,2,-,n,n,n,,
 247153621,0.4576,0.3174,0.4576,0.3174,0.9151,0.2667,0,dbl-maybe,0.008438,y,n,2,0,-,m,m,n,Double-dip visible in phase-folded LC for P2,
@@ -91,15 +91,15 @@ EPIC,fund_period,fund_power,sig_period,sig_power,sec_period,sec_power,num_sig,ha
 247218216,0.8891,0.7063,0.8891,0.7063,1.3377,0.0693,2,-,0.007691,n,m,0,2,2,n,n,n,"Seems to be another period in there, but neither P2 or P3 phase well",
 247230044,62.6959,0.0242,62.6959,0.0242,0.2119,0.0126,2,-,0.006045,n,n,2,0,2,m,m,n,,"DSS slightly extended, nothing in 2MASS"
 247254123,0.369,0.1143,0.369,0.1143,11.5586,0.0082,1,-,0.006999,n,n,0,2,-,m,n,n,,
-247282522,1.4599,0.6371,1.4599,0.6371,44.2338,0.0764,4,-,0.007228,n,n,0,2,2,n,n,n,,2MASS ghosts?
+247282522,1.4599,0.6371,1.4599,0.6371,44.2338,0.0764,4,-,0.007228,n,n,0,2,2,n,n,n,,2MASS glint artifacts
 247288261,0.7944,0.1597,0.7944,0.1597,0.3973,0.0232,0,half,0.006604,y,n,0,2,-,y,y,n,,"slightly brighter neighbor, overlapping PSFs"
 247297768,3.7278,0.4701,3.7278,0.4701,1.6841,0.1291,1,half,0.008926,y,n,0,2,-,m,m,m,,I think the DSS image is just a little warped
 247306074,10.5075,0.505,10.5075,0.505,-9999,-9999,0,-,0.007899,n,n,0,-,-,n,n,n,,
 247308468,70,0.3815,0.9815,0.0862,-9999,-9999,0,-,0.007684,n,n,0,-,-,m,n,n,,
 247318877,11.9257,0.8709,11.9257,0.8709,5.9266,0.0665,0,half,0.00763,y,n,0,2,-,n,n,n,,
-247337843,10.5444,0.61,10.5444,0.61,4.9582,0.0629,2,half,0.00746,y,n,1,2,2,y,m,n,significant spot evolution and sinusoidal signal mostly disappears by second half of the campaign; P1 phases OK but may not be quite right,2MASS ghosts?
-247363759,9.6938,0.2703,9.6938,0.2703,4.862,0.1105,1,half,0.008125,y,n,0,2,-,n,n,n,evolving double-dip pattern,2MASS ghosts?
-247369717,6.462,0.5028,6.462,0.5028,11.8317,0.1546,2,-,0.00822,y,m,0,1,-,n,n,n,"Not clear if there are actually multiple periods here, or if it’s just differential rotation; twice the first period is probably the true period",2MASS ghosts?
+247337843,10.5444,0.61,10.5444,0.61,4.9582,0.0629,2,half,0.00746,y,n,1,2,2,y,m,n,significant spot evolution and sinusoidal signal mostly disappears by second half of the campaign; P1 phases OK but may not be quite right,plus 2MASS glint artifacts
+247363759,9.6938,0.2703,9.6938,0.2703,4.862,0.1105,1,half,0.008125,y,n,0,2,-,n,n,n,evolving double-dip pattern,2MASS glint artifacts
+247369717,6.462,0.5028,6.462,0.5028,11.8317,0.1546,2,-,0.00822,y,m,0,1,-,n,n,n,"Not clear if there are actually multiple periods here, or if it’s just differential rotation; twice the first period is probably the true period",2MASS glint artifacts
 247381505,33.0438,0.2382,33.0438,0.2382,7.1037,0.0199,3,-,0.007383,n,n,2,2,2,y,y,n,P2 phases OK but isn’t real based on the full light curve; P3 phase-folded just looks flat,"similar brightness neighbor, overlapping PSFs"
 247395996,1.4382,0.7448,1.4382,0.7448,0.7179,0.0444,0,half,0.00849,n,n,0,2,-,n,n,n,,
 247441866,0.2579,0.0204,0.2579,0.0204,0.5182,0.0197,2,dbl-maybe,0.007594,n,n,0,2,2,n,n,n,P1 and P2 have almost identical peak heights; P1 phases slightly better,
@@ -122,12 +122,12 @@ EPIC,fund_period,fund_power,sig_period,sig_power,sec_period,sec_power,num_sig,ha
 247799152,0.2828,0.0095,0.2828,0.0095,0.3175,0.0075,1,-,0.006316,y,n,0,0,-,n,n,n,Beat pattern; likely differential rotation,
 247813004,1.711,0.2478,1.711,0.2478,0.8518,0.0738,2,half,0.007433,y,n,0,2,2,y,y,n,,"similar brightness neighbor, overlapping PSFs"
 247829435,34.1713,0.2219,34.1713,0.2219,0.6558,0.0735,1,-,0.007659,n,n,2,0,-,n,n,n,,
-247857331,7.4749,0.4632,7.4749,0.4632,3.4815,0.114,0,half,0.00758,y,n,1,2,-,y,y,n,Twice P2 is probably the true period,"several neighbors, including a slightly fainter blended one"
+247857331,7.4749,0.4632,7.4749,0.4632,3.4815,0.114,0,half,0.00758,y,n,1,2,-,y,y,n,Twice P2 is probably the true period,"several neighbors, including a slightly fainter blended one, plus 2MASS glint artifacts "
 247862511,6.5895,0.9444,6.5895,0.9444,-9999,-9999,0,-,0.008491,n,n,0,-,-,n,n,n,,
 247864824,59.002,0.8464,59.002,0.8464,-9999,-9999,0,-,0.007846,n,n,2,-,-,n,n,n,,possible object in DSS but it looks extended/fuzzy
 247899959,0.7649,0.0767,0.7649,0.0767,57.8656,0.0603,11,-,0.007158,y,n,0,2,2,y,y,n,,2 fainter blended neighbors with overlapping PSFs
 247969085,1.036,0.6415,1.036,0.6415,0.5179,0.1978,0,half,0.008067,n,n,0,2,-,y,y,n,,fainter blended neighbor
-247970815,57.8656,0.1829,57.8656,0.1829,5.9856,0.0252,2,-,0.007643,y,n,2,0,2,m,m,n,sinusoidal pattern disappears then reappears,object in diffraction spikes on both DSS and 2MASS
-248045685,40.1008,0.6217,40.1008,0.6217,13.8499,0.05,1,-,0.008064,n,n,2,2,-,y,n,n,,
+247970815,57.8656,0.1829,57.8656,0.1829,5.9856,0.0252,2,-,0.007643,y,n,2,0,2,m,m,n,sinusoidal pattern disappears then reappears,"object in diffraction spikes on both DSS and 2MASS, it’s not a glint artifact"
+248045685,40.1008,0.6217,40.1008,0.6217,13.8499,0.05,1,-,0.008064,n,n,2,2,-,y,n,n,,2MASS glint artifacts
 248170923,1.4793,0.579,1.4793,0.579,0.7393,0.1106,0,half,0.007795,y,n,0,2,-,y,y,n,Doesn’t appear to phase,faint close neighbor only in DSS
 248199652,66.8832,0.088,66.8832,0.088,5.9033,0.01,2,-,0.006816,n,n,2,2,2,y,y,n,,faint close neighbor
