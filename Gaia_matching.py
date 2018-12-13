@@ -16,6 +16,7 @@ from matplotlib.font_manager import FontProperties
 import palettable
 
 from hypra.utils import cat_match, cat_io
+import convertmass
 
 def match_gaia(to_plot=False):
 
@@ -493,7 +494,73 @@ def match_gaia(to_plot=False):
 
 
     # In[88]:
+    return joint_tab
 
+def calc_mass_unc(mK,mK_err,dist,dist_err):
+    # dmod = m-M = 5*log10(d) - 5
+    # M = m-dmod = m - 5*log10(d) + 5
+    # dM/dd = -5/(d*ln(10))
+    dmod = 5.0*np.log10(dist) - 5
+    MK = mK - dmod
+
+    bad = np.where(mK<-99)[0]
+    MK[bad] = -9999
+
+    if type(mK_err)==np.ndarray:
+        mK_err_sq = mK_err**2
+    else:
+        # actually a fraction, but real errors
+        mK_err_sq = (mK_err*mK)**2
+
+    dist_err_sq = (dist_err * 5.0 / (dist * np.log(10.0)))**2
+
+    sigma_MK = np.sqrt(mK_err_sq + dist_err_sq)
+    #print(sigma_MK)
+
+    MK_low =  MK + sigma_MK #dimmer/lower mass
+    MK_high = MK - sigma_MK #brighter/higher mass
+    #print('low',MK_low)
+    #print('high',MK_high)
+
+    good = np.where((MK>0) & (MK_low>0) & (MK_high>0)  &
+                    (MK.mask==False))[0]
+
+    mass, mass_low, mass_high = np.ones(len(MK))*-9999.,np.ones(len(MK))*-9999.,np.ones(len(MK))*-9999.
+
+    mass[good] = convertmass.kraus(np.asarray(MK[good]),'K','None')
+    mass_low[good] = convertmass.kraus(np.asarray(MK_low[good]),'K','None')
+    mass_high[good] = convertmass.kraus(np.asarray(MK_high[good]),'K','None')
+
+    mass_errs = np.zeros(2*len(mK)).reshape((2,-1))
+
+    mass_errs[1][good] = abs(mass_low-mass)[good]
+    mass_errs[0][good] = abs(mass_high-mass)[good]
+
+    return mass,mass_errs
+
+def hyades_mass_unc(dist, e_dist, mK, e_mK):
+
+    mass,mass_errs = calc_mass_unc(mK, e_mK, dist, e_dist)
+
+    good_mass = np.where(mass>0)[0]
+    good_errs = np.zeros(2*len(good_mass)).reshape((2,-1))
+    good_errs[0] = mass_errs[0][good_mass]
+    good_errs[1] = mass_errs[1][good_mass]
+
+    return mass, mass_errs
+
+def calc_gaia_masses(joint_tab):
+    gdist = 1000/joint_tab["Plx"]
+    e_gdist = abs(1000.0 * joint_tab["e_Plx"] /
+                  (joint_tab["Plx"]**2))
+
+    gmass, gmass_err = hyades_mass_unc(gdist, e_gdist, joint_tab["TWOMASS_K"],
+                                       joint_tab["TWOMASS_KERR"])
+
+    return gmass, gmass_err
+
+
+def print_gaia(joint_tab):
 
     out_names = ["HYADES_IDX","RA","DEC","GOLDMAN_PMRA","GOLDMAN_PMDE",
                  "ROESER_PMRA","ROESER_PMDEC",
@@ -506,16 +573,17 @@ def match_gaia(to_plot=False):
                 "HIP_PAR_ERR","RPRIME","RMAG_FLAG","GOLDMAN_SEQ",
                 "GOLDMAN_PLX","GOLDMAN_E_PLX","GOLDMAN_RMED","GOLDMAN_E_RMED",
                 "GOLDMAN_IMED","GOLDMAN_E_IMED",
-                "EPIC_ID","K2_PERIOD","PROSSER_PERIOD","HARTMAN_PERIOD",
-                 "DELORME_LITP",
-                 # Now for the Gaia DR2 Columns
-                 "DR2Name","RA_ICRS","e_RA_ICRS","DE_ICRS",
+                "EPIC_ID",
+                ## Don't actually include these here, make a separate table for periods
+                ## "K2_PERIOD","PROSSER_PERIOD","HARTMAN_PERIOD","DELORME_LITP",
+                # Now for the Gaia DR2 Columns
+                "DR2Name","RA_ICRS","e_RA_ICRS","DE_ICRS",
                 "e_DE_ICRS","Source","Epoch","Plx","e_Plx","pmRA","e_pmRA",
                 "pmDE","e_pmDE","Gmag","e_Gmag","BPmag","e_BPmag","RPmag",
-                 "e_RPmag","E(BR/RP)","BP-RP","RV","e_RV",
-                 "RPlx","RFG","NgAL","chi2AL","RFBP","RFRP","Nper",
-                 # And my additions
-                "HRD","GAIA_QUAL"]
+                "e_RPmag","E(BR/RP)","BP-RP","RV","e_RV",
+                "RPlx","RFG","NgAL","chi2AL","RFBP","RFRP","Nper",
+                # And my additions
+                "KH_MASS_GAIA","e_KH_MASS_GAIA","HRD","GAIA_QUAL"]
 
 
     # In[89]:
@@ -529,6 +597,9 @@ def match_gaia(to_plot=False):
 
 
     out_tab = joint_tab[out_names]
+
+    out_tab["RPRIME"].mask[out_tab["RPRIME"]<-98] = True
+
     out_tab.rename_column("RA","RAJ2000")
     out_tab.rename_column("DEC","DEJ2000")
 
@@ -553,52 +624,20 @@ def match_gaia(to_plot=False):
     out_tab.rename_column("RMAG_FLAG","RPRIME_SOURCE")
     out_tab.rename_column("GOLDMAN_SEQ","[RSP2011]")
 
-    out_tab.rename_column("K2_PERIOD","Prot5")
-    out_tab.rename_column("DELORME_LITP","ProtD")
-    out_tab.rename_column("PROSSER_PERIOD","ProtP")
-    out_tab.rename_column("HARTMAN_PERIOD","ProtH")
+    ## Don't actually include these here, make a separate table for periods
+    # out_tab.rename_column("K2_PERIOD","Prot5")
+    # out_tab.rename_column("DELORME_LITP","ProtD")
+    # out_tab.rename_column("PROSSER_PERIOD","ProtP")
+    # out_tab.rename_column("HARTMAN_PERIOD","ProtH")
+    # out_tab["Prot5"][out_tab["Prot5"]<=0] = -9999
 
     out_tab.rename_column("HRD","HRD_MEMBER")
 
-
-    # In[92]:
-
-
-    out_tab["Prot5"][out_tab["Prot5"]<=0] = -9999
-
-
-    # In[93]:
-
-
     out_tab.meta = {}
 
-
-    # In[94]:
-
-
-    # nulls = ["nan","-","-9999.0","no_string","-9999","0.0", # for K2_PERIOD - uhoh
-    #          "HIP0","X"]
-
-
-    # In[111]:
-
-
-    fill_values = [(at.masked, 'NaN'),
-                  ("nan","NaN"),
-                  ("-9999.0000","NaN"),
-                  ("-9999.000","NaN"),
-                  ("-9999.00","NaN"),
-                  ("-9999.0","NaN"),
-                  ("-9999","NaN"),
-                  ("no_string","Null"),
-                  ("HIP0","Null")]
-
-
-    # In[122]:
-
-
-    fill_values = [#(at.masked, 'NaN'),
+    fill_values = [#(at.masked, ""),
                   ("X",""),
+                  ("0",""),
                   ("-",""),
                   ("nan",""),
                   ("-9999.0000",""),
@@ -606,8 +645,10 @@ def match_gaia(to_plot=False):
                   ("-9999.00",""),
                   ("-9999.0",""),
                   ("-9999",""),
+                  ("-99",""),
                   ("no_string",""),
                   ("no string",""),
+                  ("no st",""),
                   ("HIP0","")]
 
 
@@ -644,6 +685,7 @@ def match_gaia(to_plot=False):
                "RV":"%.2f","e_RV":"%.2f",
                  "RPlx":"%.2f","RFG":"%.2f","chi2AL":"%.2f",
                "RFBP":"%.2f","RFRP":"%.2f",
+               "KH_MASS_GAIA":"%.2f","e_KH_MASS_GAIA":"%.2f"
                }
 
 
@@ -654,4 +696,17 @@ def match_gaia(to_plot=False):
             delimiter=",",overwrite=True,fill_values=fill_values)
 
 if __name__=="__main__":
-    match_gaia(to_plot=True)
+    joint_tab = match_gaia(to_plot=False)
+
+    gmass, gmass_errs = calc_gaia_masses(joint_tab)
+
+    # print(np.shape(gmass_errs))
+    # print(np.sum(gmass_errs,0))
+    # print(np.sum(gmass_errs,1))
+    # print(np.sum(gmass_errs))
+    avg_errs = np.sum(gmass_errs,0)/2
+
+    joint_tab["KH_MASS_GAIA"] = gmass
+    joint_tab["e_KH_MASS_GAIA"] = avg_errs
+
+    print_gaia(joint_tab)
