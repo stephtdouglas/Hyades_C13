@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 import sys, os
+import glob
 
 import numpy as np
 import astropy.io.ascii as at
@@ -147,8 +148,30 @@ def check_circle(sep_off=30*u.degree,to_plot=True,to_output=True):
         # if pa>=30:
         #     break
 
+def summarize_contamination(base_path="."):
+
+    files = glob.glob(os.path.join(base_path,"Gaia_contam_*.csv"))
+
+    if len(files)<=1:
+        print("No files found! Please check directory or run check_circle")
+    else:
+        fraction10 = np.zeros(len(files))
+        fraction20 = np.zeros(len(files))
+        for i,filename in enumerate(files):
+            contam = at.read(filename)
+            print(contam.dtype)
+            # IDX,RA,Dec,Match10,NMatch10,Match20,NMatch20
+            fraction10[i] = len(np.where(contam["Match10"]=="True")[0])/len(contam)
+            fraction20[i] = len(np.where(contam["Match20"]=="True")[0])/len(contam)
+
+        print("{0:.1f}\% - {1:.1f}\% with a match in 10 arcsec".format(
+              min(fraction10)*100,max(fraction10)*100))
+
+        print("{0:.1f}\% - {1:.1f}\% with a match in 20 arcsec".format(
+              min(fraction20)*100,max(fraction20)*100))
 
 if __name__=="__main__":
     # print(astropy.__version__)
     # contamination_check(to_plot=True)
-    check_circle()
+    # check_circle()
+    summarize_contamination()
