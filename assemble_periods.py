@@ -62,7 +62,7 @@ def get_c13_periods():
     comments = at.read("c13_tables/c13_k2sc_output_2018-05-29_comments_final.csv",
                        delimiter=",")
     # print(comments.dtype)
-    print(len(comments))
+    print(len(comments),"K2 targets")
     #
     print(np.where(comments["Q"]==-1)[0])
 
@@ -112,6 +112,8 @@ def get_c13_periods():
 
     # peak separation threshold to be considered a binary
     min_dpp = 0.2
+    close_peak_count = 0
+    blend_count = 0
 
     # Match targets from our catalog to the EPIC results
     for i in potential_new:
@@ -155,6 +157,8 @@ def get_c13_periods():
                         pperiods_secondary[i] = res["sec_period"][k2_loc]
                         powers_secondary[i] = res["sec_power"][k2_loc]
                         quality_secondary[i] = comments["Q2"][k2_loc]
+                    else:
+                        close_peak_count += 1
 
                 # I only saved the first and second periods/powers in my main table,
                 # so have to dig into the table of all significant peaks to pull out
@@ -171,6 +175,8 @@ def get_c13_periods():
                         pperiods_secondary[i] = sorted_periods[2]
                         powers_secondary[i] = sorted_powers[2]
                         quality_secondary[i] = comments["Q3"][k2_loc]
+                    else:
+                        close_peak_count += 1
 
             # Check whether there's already a literature period in my catalog
             # If not, K2 is the dominant period
@@ -191,6 +197,9 @@ def get_c13_periods():
                or (k2_blend[k2_loc]=="Y") or (k2_blend[k2_loc]=="y")
                ):
                 pblend[i] = 1
+                if (k2_blend[k2_loc]=="Y") or (k2_blend[k2_loc]=="y"):
+                    blend_count += 1
+
 
             # Reset quality flag based on number of peaks in the light curve
             epic_peaks = np.where(cat_epic==peaks["EPIC"])[0]
@@ -204,18 +213,23 @@ def get_c13_periods():
             #print(c5_harm[c5_loc],pharm[i])
             pharm[i] = k2_harm[k2_loc][0]
 
-    print(len(np.where(pperiods_secondary>0)[0]),"with secondary periods")
-    print(len(np.where(pblend>0)[0]),"blend/multi")
-    # pblend = np.zeros(len(hdat),int)
 
-    c13 = potential_new#np.where((pdat["K2_TARGET"]>0))[0]
-    print(len(c13),"C13 targets")
+    ntargets = len(comments)
     print(len(np.where((pperiods_onlyk2>0) & (pqual<2) & (pqual>=0))[0]),"K2 stars with periods")
+
+
+    print(len(np.where(pperiods_secondary>0)[0]),"with secondary periods",
+          "at peak separations >",min_dpp)
+    print("plus",close_peak_count,"with closer secondary peaks")
+    print(blend_count,"with blended neighbors, or {0:.1f}\%".format(100*blend_count/len(comments)))
+    print(len(np.where(pblend>0)[0]),"blend/multi")
 
     # Counting - directly adapted from C5, possibly not the right numbers
     # New Periods
     new_k2 = np.where((pperiods_onlyk2>0) & (hdat["PERIOD"]<0) & (pqual<2) & (pqual>=0))[0]
     print(len(new_k2), " new K2 periods")
+    repeat_k2 = np.where((pperiods_onlyk2>0) & (hdat["PERIOD"]>0) & (pqual<2) & (pqual>=0))[0]
+    print(len(repeat_k2), " with literature periods")
     quality_k2 = np.where((pperiods_onlyk2>0) & (hdat["PERIOD"]<0) & (pqual==0) & (pbad==0))[0]
     print(len(quality_k2), " high quality new K2 periods")
     low_quality_k2 = np.where((pperiods_onlyk2>0) & (hdat["PERIOD"]<0) & (pqual==1))[0]
@@ -226,18 +240,27 @@ def get_c13_periods():
     print(len(low_quality_k2), " low quality new K2 periods as flagged by me AND the periodograms\n")
 
     # Non-detections
-    print(bad_count," with no K2 detection",bad_count*100/len(c13),"%")
+    print(bad_count," with no K2 detection",bad_count*100/ntargets,"%")
     print(len(np.where(pqual==3)[0]),"alternate count of no detections\n")
 
     # Ones I flagged as bad
     bad_flag_count = len(np.where((pqual==2))[0])
-    print("I removed",bad_flag_count,bad_flag_count*100/len(c13),"% leaving",len(c13)-bad_count-bad_flag_count)
+    print("I removed",bad_flag_count,bad_flag_count*100/ntargets,"% leaving",ntargets-bad_count-bad_flag_count)
+
+
+    # 1st peak isn't real period
+    print(replace_count," stars where the highest peak doesn't look real")
 
     # Totals
-    print("Originally",len(c13),"remove", bad_count, "and", bad_flag_count, "leave", len(c13)-bad_count-bad_flag_count,"\n")
+    print("Originally",ntargets,"remove", bad_count, "and", bad_flag_count, "leave", ntargets-bad_count-bad_flag_count,"\n")
 
-    print(np.intersect1d(c13,np.where((pperiods_onlyk2<0) & ((pqual==1) | pqual==0))[0]))
-    print(np.intersect1d(c13,np.where((pperiods_allk2<0) & ((pqual==1) | pqual==0))[0]))
+    # Total rotators
+    print("Pre-K2:",len(np.where(hdat["PERIOD"]>0)[0]))
+    print("Total rotators:",len(np.where((hdat["PERIOD"]>0) |
+          ((pperiods_onlyk2>0) & (pqual<2) & (pqual>=0)))[0]))
+
+    # print(np.intersect1d(c13,np.where((pperiods_onlyk2<0) & ((pqual==1) | pqual==0))[0]))
+    # print(np.intersect1d(c13,np.where((pperiods_allk2<0) & ((pqual==1) | pqual==0))[0]))
 
     output = (pperiods,pperiods_secondary,powers_secondary,
               quality_secondary,pflag,pmass,pqual,pbad,ppower,pthreshold,
