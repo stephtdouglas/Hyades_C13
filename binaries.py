@@ -70,7 +70,7 @@ def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True, plot_candidate=
     ax.tick_params(width=1.5, length=6)
     ax.tick_params(which="minor",width=1.5, length=3)
 
-def calc_residual(abs_r):
+def calc_residual(abs_r, dmod):
     fig = plt.figure()
     ax = plt.subplot(111)
 
@@ -85,9 +85,9 @@ def calc_residual(abs_r):
 
     return residual
 
-def paper_plot(abs_r):
+def paper_plot(abs_r,dmod):
 
-    residual = calc_residual(abs_r)
+    residual = calc_residual(abs_r,dmod)
     fig = plt.figure(figsize=triple_stacked)
 
     #### TOP - CMD with binary sequence overlaid
@@ -161,11 +161,35 @@ def paper_plot(abs_r):
     # plt.savefig("/home/stephanie/Dropbox/plots_for_sharing/binary_cmd_praesepe.png",
     #             bbox_inches="tight"))
 
-if __name__=="__main__":
+def gaia_binaries_plot():
 
+    gaia = at.read("Gaia_Comb_Table.csv")
+
+    gaia_plx = np.zeros(len(hdat))*np.nan
+    good_plx = gaia["Plx"].mask==False
+    gaia_plx[gaia["HYADES_IDX"][good_plx]] = gaia["Plx"][good_plx]
+
+    gaia_dist = 1000/gaia_plx
+
+    dmod = 5 * np.log10(gaia_dist) - 5
+    abs_r = hdat["RPRIME"] - dmod
+    abs_r[hdat["RPRIME"]<-9998] = -9999
+
+    paper_plot(abs_r,dmod)
+
+    plt.suptitle("Gaia parallax for all")
+    plt.savefig("binary_cmd_gaiadist_oldbin.png",bbox_inches="tight")
+    plt.close("all")
+
+def old_binaries_plot():
     dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
     abs_r = hdat["RPRIME"] - dmod
     abs_r[hdat["RPRIME"]<-9998] = -9999
 
-    paper_plot(abs_r)
-    plt.savefig("binary_cmd_olddist.png",bbox_inches="tight")
+    paper_plot(abs_r,dmod)
+    plt.savefig("binary_cmd_olddist_oldbin.png",bbox_inches="tight")
+    plt.close("all")
+
+if __name__=="__main__":
+
+    gaia_binaries_plot()
