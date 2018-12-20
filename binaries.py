@@ -18,7 +18,7 @@ hdat,hobs,hobsnr,hobsr = cat_io.get_data("H")
 single_figure = (8,8)
 double_figure = (13,6)
 double_stacked = (6,13)
-triple_stacked = (6,14)
+triple_stacked = (6,13)
 quad_square = (13,13)
 
 std_ms = 9
@@ -29,11 +29,40 @@ color_cycle = palettable.colorbrewer.qualitative.Dark2_8.mpl_colors
 ms_color = color_cycle[3] #"#5d58a7" #
 cand_color = color_cycle[2]
 lit_color = color_cycle[1]
+old_color = color_cycle[4]
 conf_color = "k"
 background_color = plt.cm.Greys(0.4)
 
+gaia_tab = at.read("Gaia_Comb_Table.csv")
 
-def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True, plot_candidate=True, plot_single=False):
+def calc_residual(abs_r, dmod):
+    fig = plt.figure()
+    ax = plt.subplot(111)
+
+    ms,color = color_mag.add_ms(ax,dmod,return_ms=True,line_color=ms_color)
+    plt.close()
+
+    model_r = np.ones_like(abs_r)*-9999.
+    good_interp = np.where((hdat["RPRIME_K"]>min(color)) & (hdat["RPRIME_K"]<max(color)))[0]
+    model_r[good_interp] = ms(hdat["RPRIME_K"][good_interp])
+    residual = abs_r - model_r
+    residual[model_r<-9998] = -9999
+
+    return residual
+
+
+def calc_old_binaries():
+    dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
+    abs_r = hdat["RPRIME"] - dmod
+    abs_r[hdat["RPRIME"]<-9998] = -9999
+    residual = calc_residual(abs_r,dmod)
+    cand = ((hdat["RPRIME_K"]>0) & (residual>-9) &
+            (hdat["RPRIME_K"]<4) & (residual<(-0.75/2)))
+
+    return cand
+
+
+def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True, plot_candidate=True, plot_single=False, plot_old_candidate=False):
 
     # All cluster members
     if plot_all:
@@ -48,18 +77,24 @@ def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True, plot_candidate=
                 mec=conf_color, label="Confirmed Multiple")
 
 
-    our_cand = np.zeros(len(hdat),int)
-    for i,cite in enumerate(hdat["BINARY_CITE"]):
-        if "douglas" in cite:
-            our_cand[i] = 1
-        else:
-            continue
+
+    our_cand0 = calc_old_binaries()
+    # print(our_cand0)
+    our_cand = np.asarray(our_cand0,int)
+    # print(our_cand)
+
+    # our_cand = np.zeros(len(hdat),int)
+    # for i,cite in enumerate(hdat["BINARY_CITE"]):
+    #     if "douglas" in cite:
+    #         our_cand[i] = 1
+    #     else:
+    #         continue
     # Candidate binaries
     if plot_candidate:
         binary = (x>0) & (y>-9) & (hdat["BINARY"]==1)
         ours = our_cand==1
         ax.plot(x[binary & ours], y[binary & ours], 'o', mfc="none", mew=1.5,
-                mec=cand_color, label="Candidate Multiple (Douglas+2014)")
+                mec=cand_color, label="Candidate Multiple")
         other = our_cand==0
         nother = len(np.where(other & binary)[0])
         print(nother)
@@ -67,23 +102,13 @@ def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True, plot_candidate=
             ax.plot(x[binary & other], y[binary & other], 'D', mfc="none", mew=1.5,
                     mec=lit_color, label="Candidate Multiple (Literature)")
 
+    if plot_old_candidate:
+        ax.plot(x[our_cand0], y[our_cand0], 'o', mfc="none", mew=1.5,
+                mec=old_color, label="Candidate Multiple (Douglas+2014)")
+
     ax.tick_params(width=1.5, length=6)
     ax.tick_params(which="minor",width=1.5, length=3)
 
-def calc_residual(abs_r, dmod):
-    fig = plt.figure()
-    ax = plt.subplot(111)
-
-    ms,color = color_mag.add_ms(ax,dmod,return_ms=True,line_color=ms_color)
-    plt.close("all")
-
-    model_r = np.ones_like(abs_r)*-9999.
-    good_interp = np.where((hdat["RPRIME_K"]>min(color)) & (hdat["RPRIME_K"]<max(color)))[0]
-    model_r[good_interp] = ms(hdat["RPRIME_K"][good_interp])
-    residual = abs_r - model_r
-    residual[model_r<-9998] = -9999
-
-    return residual
 
 def paper_plot(abs_r,dmod):
 
@@ -116,10 +141,11 @@ def paper_plot(abs_r,dmod):
     #ax = plt.subplot2grid((3,1),(2,0),rowspan=1)
     color_mag.setup_axes(ax,"(r'-K)",r"M$_{r'}$ - M$_{r'}$(Main Sequence)",[0,6.75,0.9,-2.49])
     plt.subplots_adjust(hspace=0)
-    plot_binaries(ax, hdat["RPRIME_K"], residual, True,False,False)
-    cand = np.where((hdat["RPRIME_K"]>0) & (residual>-9) & (hdat["RPRIME_K"]<4) & (residual<(-0.75/2)))[0]
-    ax.plot(hdat["RPRIME_K"][cand], residual[cand], 'o', mfc="none", mew=1.5,
-            mec=cand_color, label="Candidate Multiple")
+    plot_binaries(ax, hdat["RPRIME_K"], residual, True, False, False,
+                  plot_old_candidate=True)
+    # cand = np.where((hdat["RPRIME_K"]>0) & (residual>-9) & (hdat["RPRIME_K"]<4) & (residual<(-0.75/2)))[0]
+    # ax.plot(hdat["RPRIME_K"][cand], residual[cand], 'o', mfc="none", mew=1.5,
+    #         mec=cand_color, label="Candidate Multiple")
     ax.axvline(4,color="Grey",zorder=-111)
     ax.set_xlabel("")
     ax.tick_params(labelbottom=False)
@@ -190,6 +216,8 @@ def old_binaries_plot():
     plt.savefig("binary_cmd_olddist_oldbin.png",bbox_inches="tight")
     plt.close("all")
 
-if __name__=="__main__":
 
+
+if __name__=="__main__":
+    old_binaries_plot()
     gaia_binaries_plot()
