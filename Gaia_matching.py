@@ -696,7 +696,12 @@ def print_gaia(joint_tab):
 
 
     at.write(out_tab,"Gaia_Comb_Table.csv",formats=formats,
-            delimiter=",",overwrite=True,fill_values=fill_values)
+             delimiter=",",overwrite=True,fill_values=fill_values)
+    at.write(out_tab,
+             os.path.expanduser(
+             "~/my_papers/hyadesk22/Gaia_Comb_Table.csv"),
+             formats=formats,
+             delimiter=",",overwrite=True,fill_values=fill_values)
 
 def compare_jasons_matches(joint_tab):
 
