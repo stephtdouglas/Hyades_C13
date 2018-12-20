@@ -18,6 +18,7 @@ import palettable
 from hypra.utils import cat_match, cat_io
 import convertmass
 
+
 def match_gaia(to_plot=False):
 
     # # Just crossmatching against Gaia
@@ -32,7 +33,6 @@ def match_gaia(to_plot=False):
 
 
     # In[3]:
-
 
     hdat,_,_,_ = cat_io.get_data("H")
     hpos = SkyCoord(hdat["RA"],hdat["DEC"],unit=u.degree)
@@ -583,7 +583,9 @@ def print_gaia(joint_tab):
                 "e_RPmag","E(BR/RP)","BP-RP","RV","e_RV",
                 "RPlx","RFG","NgAL","chi2AL","RFBP","RFRP","Nper",
                 # And my additions
-                "KH_MASS_GAIA","e_KH_MASS_GAIA","HRD","GAIA_QUAL"]
+                "KH_MASS_GAIA","e_KH_MASS_GAIA",
+                "e_KH_MASS_GAIA0","e_KH_MASS_GAIA1",
+                "HRD","GAIA_QUAL"]
 
 
     # In[89]:
@@ -685,7 +687,8 @@ def print_gaia(joint_tab):
                "RV":"%.2f","e_RV":"%.2f",
                  "RPlx":"%.2f","RFG":"%.2f","chi2AL":"%.2f",
                "RFBP":"%.2f","RFRP":"%.2f",
-               "KH_MASS_GAIA":"%.2f","e_KH_MASS_GAIA":"%.2f"
+               "KH_MASS_GAIA":"%.2f","e_KH_MASS_GAIA":"%.2f",
+               "KH_MASS_GAIA0":"%.2f","e_KH_MASS_GAIA1":"%.2f"
                }
 
 
@@ -695,7 +698,44 @@ def print_gaia(joint_tab):
     at.write(out_tab,"Gaia_Comb_Table.csv",formats=formats,
             delimiter=",",overwrite=True,fill_values=fill_values)
 
+def compare_jasons_matches(joint_tab):
+
+    jdir = os.path.expanduser("~/my_papers/HyPra-JC/Hyades")
+    jfile1 = os.path.join(jdir,"HyadesDR2-FirstList.txt")
+    jfile2 = os.path.join(jdir,"HyadesDR2-C13.txt")
+
+    for filename in [jfile1,jfile2]:
+        print(filename.split("/")[-1])
+        jtab = at.read(filename)
+
+        jpos = SkyCoord(jtab["RA"], jtab["Dec"], unit=u.degree)
+        idx, sep, _ = hpos.match_to_catalog_sky(jpos)
+        print(len(idx),len(hpos),len(jpos))
+
+        good_match = np.where(sep<(5*u.arcsec))[0]
+        good_idx = idx[good_match]
+        print(len(good_match),len(good_idx),len(np.unique(good_idx)))
+
+        j_gaiaid = np.zeros_like(joint_tab["DR2Name"])
+        j_gaiaid[good_match] = jtab["DR2Name"][good_idx]
+
+
+        for i in good_match:
+            jname = "Gaia DR2 {0}".format(j_gaiaid[i])
+            if jname!=joint_tab["DR2Name"][i]:
+                print("Uh oh!")
+                print(joint_tab["DR2Name"][i],j_gaiaid[i])
+                print(jpos[jtab["DR2Name"]==j_gaiaid[i]],"J")
+                print(hpos[i],"H")
+                print(joint_tab["Source"][i])
+
+
 if __name__=="__main__":
+
+
+    hdat,_,_,_ = cat_io.get_data("H")
+    hpos = SkyCoord(hdat["RA"],hdat["DEC"],unit=u.degree)
+
     joint_tab = match_gaia(to_plot=False)
 
     gmass, gmass_errs = calc_gaia_masses(joint_tab)
@@ -708,5 +748,9 @@ if __name__=="__main__":
 
     joint_tab["KH_MASS_GAIA"] = gmass
     joint_tab["e_KH_MASS_GAIA"] = avg_errs
+    joint_tab["e_KH_MASS_GAIA0"] = gmass_errs[0]
+    joint_tab["e_KH_MASS_GAIA1"] = gmass_errs[1]
 
     print_gaia(joint_tab)
+
+    compare_jasons_matches(joint_tab)
