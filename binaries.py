@@ -1,4 +1,4 @@
-
+import os
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import palettable
@@ -62,7 +62,17 @@ def calc_old_binaries():
     return cand
 
 
-def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True, plot_candidate=True, plot_single=False, plot_old_candidate=False):
+gaia_jason = at.read(os.path.expanduser("~/my_papers/hyadesk22/NotesJC/Table-Hyades.txt"))
+def gaia_candidates():
+    jason_cand = gaia_jason["IDX"][gaia_jason["dCMD"]<(-0.375)]
+    print(jason_cand)
+
+    return jason_cand
+
+
+def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True,
+                  plot_candidate=True, plot_single=False,
+                  plot_old_candidate=False,plot_gaia_candidate=False):
 
     # All cluster members
     if plot_all:
@@ -105,6 +115,12 @@ def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True, plot_candidate=
     if plot_old_candidate:
         ax.plot(x[our_cand0], y[our_cand0], 'o', mfc="none", mew=1.5,
                 mec=old_color, label="Candidate Multiple (Douglas+2014)")
+
+    if plot_gaia_candidate:
+        gaia_cand = gaia_candidates()
+        ax.plot(x[gaia_cand], y[gaia_cand], 'o', mfc="none", mew=1.5,
+                mec='blue', label="Candidate Multiple (Gaia CMD)",zorder=12)
+
 
     ax.tick_params(width=1.5, length=6)
     ax.tick_params(which="minor",width=1.5, length=3)
@@ -203,9 +219,23 @@ def gaia_binaries_plot():
 
     paper_plot(abs_r,dmod)
 
-    plt.suptitle("Gaia parallax for all")
+    plt.suptitle("Gaia parallax for all",y=0.92)
     plt.savefig("binary_cmd_gaiadist_oldbin.png",bbox_inches="tight")
     plt.close("all")
+    # plt.show()
+
+def jason_binaries_plot():
+    dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
+    abs_r = hdat["RPRIME"] - dmod
+    abs_r[hdat["RPRIME"]<-9998] = -9999
+
+    paper_plot(abs_r,dmod)
+
+    plt.suptitle("Jason's gaia matches, old parallaxes",y=0.9)
+    # plt.savefig("binary_cmd_gaiadist_oldbin.png",bbox_inches="tight")
+    plt.show()
+    # plt.close("all")
+
 
 def old_binaries_plot():
     dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
@@ -213,6 +243,7 @@ def old_binaries_plot():
     abs_r[hdat["RPRIME"]<-9998] = -9999
 
     paper_plot(abs_r,dmod)
+    plt.suptitle("D16 parallax for all",y=0.92)
     plt.savefig("binary_cmd_olddist_oldbin.png",bbox_inches="tight")
     plt.close("all")
 
@@ -221,3 +252,4 @@ def old_binaries_plot():
 if __name__=="__main__":
     old_binaries_plot()
     gaia_binaries_plot()
+    # jason_binaries_plot()
