@@ -19,7 +19,7 @@ hdat,hobs,hobsnr,hobsr = cat_io.get_data("H")
 single_figure = (8,8)
 double_figure = (13,6)
 double_stacked = (6,13)
-triple_stacked = (6,12)
+triple_stacked = (6,13)
 quad_square = (13,13)
 
 std_ms = 9
@@ -235,7 +235,10 @@ def paper_plot(abs_r,dmod):
 
 
 
-def paper_plot_gaia(abs_g,color,dmod,color_name=r"(G$_{BP}$ - G$_{RP}$)",extents=[0.75,4,14.5,-1]):
+def paper_plot_gaia(abs_g, color, dmod,
+                    color_name=r"(G$_{BP}$ - G$_{RP}$)",
+                    extents=[0.75,4,14.5,-1], plot_single=False,
+                    plot_old_candidate=False, plot_gaia_candidate=False):
 
     residual = calc_gaia_residual(abs_g,color,dmod)
     fig = plt.figure(figsize=triple_stacked)
@@ -249,7 +252,9 @@ def paper_plot_gaia(abs_g,color,dmod,color_name=r"(G$_{BP}$ - G$_{RP}$)",extents
     # TODO: add spectral types in Gaia colors
     # color_mag.add_spt(ax, 0.2)
 
-    plot_binaries(ax, color, abs_g, True,False,False)
+    plot_binaries(ax, color, abs_g, True,False,False, plot_single=False,
+                  plot_old_candidate=False,
+                  plot_gaia_candidate=False)
     ax.set_xlabel("")
     ax.tick_params(labelbottom=False)
     # Plot main sequence for Gaia
@@ -273,7 +278,9 @@ def paper_plot_gaia(abs_g,color,dmod,color_name=r"(G$_{BP}$ - G$_{RP}$)",extents
                     extents)
     plt.subplots_adjust(hspace=0)
     plot_binaries(ax, color, residual, True, False, False,
-                  plot_old_candidate=True)
+                  plot_single=plot_single,
+                  plot_old_candidate=True,
+                  plot_gaia_candidate=plot_gaia_candidate)
     # cand = np.where((hdat["RPRIME_K"]>0) & (residual>-9) & (hdat["RPRIME_K"]<4) & (residual<(-0.75/2)))[0]
     # ax.plot(hdat["RPRIME_K"][cand], residual[cand], 'o', mfc="none", mew=1.5,
     #         mec=cand_color, label="Candidate Multiple")
@@ -294,7 +301,9 @@ def paper_plot_gaia(abs_g,color,dmod,color_name=r"(G$_{BP}$ - G$_{RP}$)",extents
                     r"M$_{G}$ - M$_{G}$(Main Sequence)",
                     extents)
     plt.subplots_adjust(hspace=0)
-    plot_binaries(ax, color, residual, True)
+    plot_binaries(ax, color, residual, True,plot_single=plot_single,
+                  plot_old_candidate=plot_old_candidate,
+                  plot_gaia_candidate=plot_gaia_candidate)
     print(len(np.where(residual>-1)[0]))
     leg = ax.legend(loc=1, numpoints=1,borderaxespad=0)
     leg.get_frame().set_alpha(1)
@@ -341,13 +350,23 @@ def gaia_binaries_plot():
     abs_g = gaia["Gmag"] - dmod
     bprp = gaia["BPmag"] - gaia["RPmag"]
     # bprp_name = r"(G$_{BP}$ - G$_{RP}$)"
-    paper_plot_gaia(abs_g,bprp,dmod)
+    paper_plot_gaia(abs_g,bprp,dmod,plot_single=False,
+                    plot_old_candidate=False, plot_gaia_candidate=False)
     plt.suptitle("Gaia parallax & Gaia photometry",y=0.92)
     plt.savefig("binary_cmd_gaiadist_bprp.png",bbox_inches="tight")
     # plt.show()
     plt.close("all")
 
 
+    abs_g = gaia["Gmag"] - dmod
+    bprp = gaia["BPmag"] - gaia["RPmag"]
+    # bprp_name = r"(G$_{BP}$ - G$_{RP}$)"
+    paper_plot_gaia(abs_g,bprp,dmod,plot_single=False,
+                    plot_old_candidate=False, plot_gaia_candidate=True)
+    plt.suptitle("Gaia parallax & Gaia photometry",y=0.92)
+    plt.savefig("binary_cmd_gaiadist_bprp_gaiacand.png",bbox_inches="tight")
+    # plt.show()
+    plt.close("all")
 
 def jason_binaries_plot():
     dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
