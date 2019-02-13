@@ -13,7 +13,7 @@ from hypra.utils import cat_match, cat_io, k2utils
 # from hypra.plot import color_mag
 import convertmass
 
-def get_c13_periods():
+def get_c13_periods(return_extras=False):
 
     hdat,hobs,hobsnr,hobsr = cat_io.get_data("H")
     hpos = SkyCoord(hdat["RA"],hdat["DEC"],unit=u.degree)
@@ -95,9 +95,16 @@ def get_c13_periods():
     pbad = np.zeros(len(hdat),int)
     ppower = np.zeros(len(hdat))
     pthreshold = np.zeros(len(hdat))
-    pharm = np.empty(len(hdat),"S12")
+    pharm = np.empty(len(hdat),"U12")
     pharm[:] = ""
     pblend = np.zeros(len(hdat),int)
+
+    spot = np.zeros(len(hdat),"U1")
+    multi = np.zeros(len(hdat),"U1")
+    blend = np.zeros(len(hdat),"U1")
+    spot[:] = "-"
+    multi[:] = "-"
+    blend[:] = "-"
 
     bad_count = 0
     replace_count = 0
@@ -180,7 +187,7 @@ def get_c13_periods():
 
             # Check whether there's already a literature period in my catalog
             # If not, K2 is the dominant period
-            if (pflag[i]=="-"):
+            if (pflag[i]=="-") and (pqual[i]<=1):
                 pperiods[i] = use_period
                 pflag[i] = "3"
 
@@ -199,6 +206,10 @@ def get_c13_periods():
                 pblend[i] = 1
                 if (k2_blend[k2_loc]=="Y") or (k2_blend[k2_loc]=="y"):
                     blend_count += 1
+
+            spot[i] = k2_spot[k2_loc].upper()
+            multi[i] = k2_multi[k2_loc].upper()
+            blend[i] = k2_blend[k2_loc].upper()
 
 
             # Reset quality flag based on number of peaks in the light curve
@@ -258,15 +269,50 @@ def get_c13_periods():
     print("Pre-K2:",len(np.where(hdat["PERIOD"]>0)[0]))
     print("Total rotators:",len(np.where((hdat["PERIOD"]>0) |
           ((pperiods_onlyk2>0) & (pqual<2) & (pqual>=0)))[0]))
+    print("Alternate check:",len(np.where(
+          ((pperiods_allk2>0) & (pqual<2) & (pqual>=0)))[0]))
+    wtf = np.where((((pperiods_allk2>0) & (pqual<2) & (pqual>=0))==False)
+                   & (hdat["PERIOD"]>0))[0]
+    print(wtf,hdat["PERIOD"][wtf],hdat["PERIOD_FLAG"][wtf],hdat["KH_MASS"][wtf],
+          hdat["BINARY"][wtf])
+    print(pperiods_onlyk2[wtf],pperiods_allk2[wtf],pqual[wtf],pflag[wtf])
 
     # print(np.intersect1d(c13,np.where((pperiods_onlyk2<0) & ((pqual==1) | pqual==0))[0]))
     # print(np.intersect1d(c13,np.where((pperiods_allk2<0) & ((pqual==1) | pqual==0))[0]))
 
-    output = (pperiods,pperiods_secondary,powers_secondary,
-              quality_secondary,pflag,pmass,pqual,pbad,ppower,pthreshold,
-              pharm,pblend,pperiods_allk2,pperiods_onlyk2)
+
+
+    if return_extras is True:
+        output = (pperiods,pperiods_secondary,powers_secondary,
+                  quality_secondary,pflag,pmass,pqual,pbad,ppower,pthreshold,
+                  pharm,pblend,pperiods_allk2,pperiods_onlyk2,spot,multi,blend)
+    else:
+        output = (pperiods,pperiods_secondary,powers_secondary,
+                  quality_secondary,pflag,pmass,pqual,pbad,ppower,pthreshold,
+                  pharm,pblend,pperiods_allk2,pperiods_onlyk2)
 
     return output
 
+def check_prae_periods():
+    pdat,_,_,_ = cat_io.get_data("P")
+
+    print("\n\n\n---------------------------------")
+    print("PRAESEPE")
+    print("---------------------------------\n")
+
+    print("Periods in the fits file:",
+          len(np.where(pdat["PERIOD"]>0)[0]))
+    print("Including a K2 quality check:",
+          len(np.where((pdat["PERIOD"]>0) & (pdat["K2_QUALITY"]<=1))[0]))
+    print(np.unique(pdat["K2_QUALITY"][pdat["PERIOD"]>0]))
+    print(pdat["PERIOD_FLAG"][(pdat["PERIOD"]>0) & (pdat["K2_QUALITY"]>1)])
+
+
+    print("Periods for Pmem<70\%:",
+          len(np.where((pdat["PERIOD"]>0) & (pdat["ADAMPMEM"]>=70))[0]))
+
 if __name__=="__main__":
-    output = get_c13_periods()
+    junk = get_c13_periods(return_extras=True)
+    print(junk[-1])
+
+    check_prae_periods()
