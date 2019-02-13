@@ -13,6 +13,8 @@ from scipy.interpolate import interp1d
 from hypra.utils import cat_io, cat_match
 from hypra.plot import color_mag
 
+import add_gaia_spts
+
 hdat,hobs,hobsnr,hobsr = cat_io.get_data("H")
 
 # A few definitions
@@ -94,10 +96,43 @@ def calc_old_binaries():
 gaia_jason = at.read(os.path.expanduser("~/my_papers/hyadesk22/NotesJC/Table-Hyades.txt"))
 def gaia_candidates():
     jason_cand = gaia_jason["IDX"][gaia_jason["dCMD"]<(-0.375)]
-    print(jason_cand)
+    # print(jason_cand)
 
     return jason_cand
 
+def compare_candidates():
+    d16_cand = np.where(calc_old_binaries())[0]
+    jason_cand = gaia_candidates()
+
+    removed_cand = np.setdiff1d(d16_cand,jason_cand)
+    print("Removed: ",removed_cand)
+    removed_jidx = np.ones(len(removed_cand),int)*-99
+    for i,ridx in enumerate(removed_cand):
+        jloc = np.where(gaia_jason["IDX"]==ridx)[0]
+        if len(jloc)==1:
+            # print(jloc)
+            removed_jidx[i] = jloc[0]
+    removed_jidx = removed_jidx[removed_jidx>=0]
+    # print(removed_jidx)
+    # print(gaia_jason["FinalFlag"][removed_jidx])
+
+    # Note: I was afraid that some of the old photometric candidates are
+    # no longer candidates after Gaia. That's true! But Jason wasn't removing
+    # any candidates from his analysis, so this only affects my plots
+    j1 = np.where(gaia_jason["FinalFlag"][removed_jidx]==1)[0]
+    print("\nNow not a candidate, Jason is plotting:",len(j1))
+    j1_jidx = np.intersect1d(np.where(gaia_jason["FinalFlag"]==1)[0],
+                            removed_jidx)
+    j1_idx = gaia_jason["IDX"][j1_jidx]
+    print(j1_idx)
+    print(hdat["EPIC_ID"][j1_idx])
+    print(hdat["PERIOD"][j1_idx])
+    print(hdat["RPRIME_K"][j1_idx])
+    print(hdat["KH_MASS"][j1_idx])
+    print(hdat["BINARY"][j1_idx])
+    # j0 = np.where(gaia_jason["FinalFlag"][removed_jidx]==0)[0]
+    # print("\nNow not a candidate, Jason was not plotting:",len(j0))
+    # print(hdat["BINARY"][j0])
 
 def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True,
                   plot_candidate=True, plot_single=False,
@@ -249,8 +284,8 @@ def paper_plot_gaia(abs_g, color, dmod,
     color_mag.setup_axes(ax,color_name,r"M$_{G}$",
                         extents)
 
-    # TODO: add spectral types in Gaia colors
-    # color_mag.add_spt(ax, 0.2)
+    # add spectral types in Gaia colors
+    add_gaia_spts.add_gaia_spts(ax)
 
     plot_binaries(ax, color, abs_g, True,False,False, plot_single=False,
                   plot_old_candidate=False,
@@ -344,7 +379,14 @@ def gaia_binaries_plot():
 
     plt.suptitle("Gaia parallax for all",y=0.92)
     plt.savefig("binary_cmd_gaiadist_oldbin.png",bbox_inches="tight")
-    plt.close("all")
+    plt.savefig(os.path.expanduser("~/my_papers/hyadesk22/binary_cmd_rK.eps"),
+                bbox_inches="tight")
+    # plt.savefig("/home/stephanie/my_papers/praeK2/fig6.eps",
+    #             bbox_inches="tight")
+    # plt.savefig("/home/stephanie/my_papers/praeK2/fig6.pdf",
+    #             bbox_inches="tight")
+    # plt.savefig("/home/stephanie/Dropbox/plots_for_sharing/binary_cmd_praesepe.png",
+    #             bbox_inches="tight"))    plt.close("all")
     # plt.show()
 
     abs_g = gaia["Gmag"] - dmod
@@ -365,6 +407,8 @@ def gaia_binaries_plot():
                     plot_old_candidate=False, plot_gaia_candidate=True)
     plt.suptitle("Gaia parallax & Gaia photometry",y=0.92)
     plt.savefig("binary_cmd_gaiadist_bprp_gaiacand.png",bbox_inches="tight")
+    plt.savefig(os.path.expanduser("~/my_papers/hyadesk22/binary_cmd_bprp.eps"),
+                bbox_inches="tight")
     # plt.show()
     plt.close("all")
 
@@ -394,6 +438,6 @@ def old_binaries_plot():
 
 
 if __name__=="__main__":
-    old_binaries_plot()
+    # old_binaries_plot()
     gaia_binaries_plot()
-    # jason_binaries_plot()
+    # compare_candidates()
