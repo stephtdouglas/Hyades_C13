@@ -361,23 +361,83 @@ def paper_plot_gaia(abs_g, color, dmod,
     # plt.savefig("/home/stephanie/Dropbox/plots_for_sharing/binary_cmd_praesepe.png",
     #             bbox_inches="tight"))
 
-def gaia_binaries_plot():
-
+def compute_new_rpmK_binaries():
     gaia = at.read("Gaia_Comb_Table.csv")
 
+    # Old binaries
+    old_cand = calc_old_binaries()
+
+    # New binaries with Gaia parallaxes where possible
     gaia_plx = np.zeros(len(hdat))*np.nan
-    good_plx = gaia["Plx"].mask==False
+    # good_plx = gaia["Plx"].mask==False
+    # Only want to use the Gaia parallax when it meets the quality criteria!
+    good_plx = ((gaia_tab["GAIA_QUAL"]=="True")
+                & (gaia_tab["GAIA_QUAL"].mask==False))
+
     gaia_plx[gaia["HYADES_IDX"][good_plx]] = gaia["Plx"][good_plx]
 
     gaia_dist = 1000/gaia_plx
 
-    dmod = 5 * np.log10(gaia_dist) - 5
+    dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
+    dmod[np.isfinite(gaia_plx)] = 5 * np.log10(gaia_dist[np.isfinite(gaia_plx)]) - 5
+    abs_r = hdat["RPRIME"] - dmod
+    abs_r[hdat["RPRIME"]<-9998] = -9999
+
+    new_residual = calc_residual(abs_r,dmod)
+    new_cand = ((hdat["RPRIME_K"]>0) & (new_residual>-9) &
+                (hdat["RPRIME_K"]<4) & (new_residual<(-0.75/2)))
+
+    remove_candidates = np.where((old_cand==True) & (new_cand==False))[0]
+    remove_final = np.copy(remove_candidates)
+    for i in remove_candidates:
+        print(i,hdat["BINARY"][i],hdat["BINARY_CITE"][i])
+        if hdat["BINARY"][i]!=1:
+            # it's confirmed or wasn't actually a candidate
+            loc = np.where(remove_final==i)[0]
+            remove_final = np.delete(remove_final,loc)
+            print("Keep ^^, confirmed or single\n")
+        elif ((hdat["BINARY"][i]==1) and (old_cand[i]==True) and
+            (("douglas2014,"==hdat["BINARY_CITE"][i])==False)):
+            # if we were the only ones
+            loc = np.where(remove_final==i)[0]
+            remove_final = np.delete(remove_final,loc)
+            print("Keep ^^, there's another ref\n")
+        else:
+            continue
+
+    print(remove_final)
+    print(hdat["BINARY"][remove_final])
+
+    add_candidates = np.where((old_cand==False) & (new_cand==True)
+                              & (hdat["BINARY"]<1))[0]
+    print(add_candidates)
+    print(hdat["BINARY"][add_candidates])
+
+    return remove_final, add_candidates, np.where(new_cand)[0]
+
+def gaia_binaries_plot():
+
+    gaia = at.read("Gaia_Comb_Table.csv")
+    # print(gaia["GAIA_QUAL"])
+
+    gaia_plx = np.zeros(len(hdat))*np.nan
+    # good_plx = gaia["Plx"].mask==False
+    # Only want to use the Gaia parallax when it meets the quality criteria!
+    good_plx = ((gaia_tab["GAIA_QUAL"]=="True")
+                & (gaia_tab["GAIA_QUAL"].mask==False))
+
+    gaia_plx[gaia["HYADES_IDX"][good_plx]] = gaia["Plx"][good_plx]
+
+    gaia_dist = 1000/gaia_plx
+
+    dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
+    dmod[np.isfinite(gaia_plx)] = 5 * np.log10(gaia_dist[np.isfinite(gaia_plx)]) - 5
     abs_r = hdat["RPRIME"] - dmod
     abs_r[hdat["RPRIME"]<-9998] = -9999
 
     paper_plot(abs_r,dmod)
 
-    plt.suptitle("Gaia parallax for all",y=0.92)
+    plt.suptitle("Gaia parallax where high-quality",y=0.92)
     plt.savefig("binary_cmd_gaiadist_oldbin.png",bbox_inches="tight")
     plt.savefig(os.path.expanduser("~/my_papers/hyadesk22/binary_cmd_rK.eps"),
                 bbox_inches="tight")
@@ -441,3 +501,4 @@ if __name__=="__main__":
     # old_binaries_plot()
     gaia_binaries_plot()
     # compare_candidates()
+    # compute_new_rpmK_binaries()
