@@ -307,12 +307,21 @@ def check_prae_periods():
     print(np.unique(pdat["K2_QUALITY"][pdat["PERIOD"]>0]))
     print(pdat["PERIOD_FLAG"][(pdat["PERIOD"]>0) & (pdat["K2_QUALITY"]>1)])
 
-
     print("Periods for Pmem<70\%:",
           len(np.where((pdat["PERIOD"]>0) & (pdat["ADAMPMEM"]>=70))[0]))
 
+    for_jason = at.read("praesepe_for_Jason_all.csv",delimiter=",")
+    print("In Jason's file:",len(for_jason))
+
+    jason_rot = np.where((for_jason["PERIOD"]>0))[0]
+    print("Rotators in Jason's file:",len(jason_rot))
+
+
+    jason_bad = np.where((for_jason["PERIOD"]>0) & for_jason["K2_QUALITY"]>=2)[0]
+    print("Bad rotators in Jason's file:",len(jason_bad))
+
 if __name__=="__main__":
-    junk = get_c13_periods(return_extras=True)
-    print(junk[-1])
+    # junk = get_c13_periods(return_extras=True)
+    # print(junk[-1])
 
     check_prae_periods()
