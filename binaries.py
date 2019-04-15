@@ -79,9 +79,6 @@ def plot_gaia_ms(ax,ms_color):
     ax.plot(fit_gmag,color-0.75/2,"-.",color=ms_color)
     ax.plot(fit_gmag,color-0.75,":",color=ms_color)
 
-
-
-
 def calc_old_binaries():
     dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
     abs_r = hdat["RPRIME"] - dmod
@@ -92,13 +89,62 @@ def calc_old_binaries():
 
     return cand
 
+def calc_new_binaries():
+    gaia = at.read("Gaia_Comb_Table.csv")
+    # New binaries with Gaia parallaxes where possible
+    gaia_plx = np.zeros(len(hdat))*np.nan
+    # good_plx = gaia["Plx"].mask==False
+    # Only want to use the Gaia parallax when it meets the quality criteria!
+    good_plx = ((gaia_tab["GAIA_QUAL"]=="True")
+                & (gaia_tab["GAIA_QUAL"].mask==False))
+
+    gaia_plx[gaia["HYADES_IDX"][good_plx]] = gaia["Plx"][good_plx]
+
+    gaia_dist = 1000/gaia_plx
+
+    dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
+    dmod[np.isfinite(gaia_plx)] = 5 * np.log10(gaia_dist[np.isfinite(gaia_plx)]) - 5
+    abs_r = hdat["RPRIME"] - dmod
+    abs_r[hdat["RPRIME"]<-9998] = -9999
+
+    new_residual = calc_residual(abs_r,dmod)
+    new_cand = ((hdat["RPRIME_K"]>0) & (new_residual>-9) &
+                (hdat["RPRIME_K"]<4) & (new_residual<(-0.75/2)))
+    # print("New",np.where(new_cand))
+
+    return new_cand
 
 gaia_jason = at.read(os.path.expanduser("~/my_papers/hyadesk22/NotesJC/Table-Hyades.txt"))
 def gaia_candidates():
+
     jason_cand = gaia_jason["IDX"][gaia_jason["dCMD"]<(-0.375)]
-    # print(jason_cand)
+    print(jason_cand)
+    print(gaia_jason["dCMD"][gaia_jason["dCMD"]<(-0.375)])
 
     return jason_cand
+
+# def compare_gaia_residuals()
+#
+#     gaia_cand = gaia_candidates()
+#
+#     gaia = at.read("Gaia_Comb_Table.csv")
+#     # print(gaia["GAIA_QUAL"])
+#
+#     gaia_plx = np.zeros(len(hdat))*np.nan
+#     # good_plx = gaia["Plx"].mask==False
+#     # Only want to use the Gaia parallax when it meets the quality criteria!
+#     good_plx = ((gaia_tab["GAIA_QUAL"]=="True")
+#                 & (gaia_tab["GAIA_QUAL"].mask==False))
+#
+#     gaia_plx[gaia["HYADES_IDX"][good_plx]] = gaia["Plx"][good_plx]
+#
+#     gaia_dist = 1000/gaia_plx
+#
+#     dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
+#     dmod[np.isfinite(gaia_plx)] = 5 * np.log10(gaia_dist[np.isfinite(gaia_plx)]) - 5
+#     abs_g = gaia["Gmag"] - dmod
+#     bprp = gaia["BPmag"] - gaia["RPmag"]
+
 
 def compare_candidates():
     d16_cand = np.where(calc_old_binaries())[0]
@@ -157,6 +203,9 @@ def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True,
     our_cand = np.asarray(our_cand0,int)
     # print(our_cand)
 
+    new_cand0 = calc_new_binaries()
+    new_cand = np.asarray(new_cand0,int)
+
     # our_cand = np.zeros(len(hdat),int)
     # for i,cite in enumerate(hdat["BINARY_CITE"]):
     #     if "douglas" in cite:
@@ -165,23 +214,32 @@ def plot_binaries(ax, x, y, plot_all=False, plot_confirmed=True,
     #         continue
     # Candidate binaries
     if plot_candidate:
-        binary = (x>0) & (y>-9) & (hdat["BINARY"]==1)
-        ours = our_cand==1
-        ax.plot(x[binary & ours], y[binary & ours], 'o', mfc="none", mew=1.5,
-                mec=cand_color, label="Candidate D16")
-        other = our_cand==0
-        nother = len(np.where(other & binary)[0])
-        print(nother)
-        if nother>0:
-            ax.plot(x[binary & other], y[binary & other], 'D', mfc="none", mew=1.5,
-                    mec=lit_color, label="Candidate (Literature)")
+        binary = (x>0) & (y>-9) & (new_cand==1)
+        if plot_confirmed:
+            binary = binary & (hdat["BINARY"]<2)
+        ax.plot(x[binary], y[binary], 'o', mfc="none", mew=1.5,
+                mec=cand_color, label="Candidate binary",zorder=12)
+
+        if plot_confirmed:
+            lit_cand = (x>0) & (y>-9) & (hdat["BINARY"]==1) & (our_cand==0)
+            nother = len(np.where(lit_cand)[0])
+            print(nother)
+            if nother>0:
+                ax.plot(x[lit_cand], y[lit_cand], 'D', mfc="none", mew=1.5,mec=lit_color, label="Candidate (Literature)")
+
 
     if plot_old_candidate:
         ax.plot(x[our_cand0], y[our_cand0], 'o', mfc="none", mew=1.5,
-                mec=old_color, label="Candidate (D16)")
+                mec=old_color, label="Candidate (D16) - removed",
+                zorder=-11)
 
     if plot_gaia_candidate:
         gaia_cand = gaia_candidates()
+        print(y[gaia_cand])
+        print(x[gaia_cand])
+        print(hdat["KH_MASS"][gaia_cand])
+        if plot_confirmed:
+            gaia_cand = np.intersect1d(gaia_cand, np.where(hdat["BINARY"]<2)[0])
         ax.plot(x[gaia_cand], y[gaia_cand], 'o', mfc="none", mew=1.5,
                 mec='blue', label="Candidate (Gaia CMD)",zorder=12)
 
@@ -221,9 +279,10 @@ def paper_plot(abs_r,dmod):
     #ax = plt.subplot2grid((3,1),(2,0),rowspan=1)
     color_mag.setup_axes(ax,"(r'-K)",r"M$_{r'}$ - M$_{r'}$(Main Sequence)",[0,6.75,0.9,-2.49])
     plt.subplots_adjust(hspace=0)
-    plot_binaries(ax, hdat["RPRIME_K"], residual, True, False, False,
+    plot_binaries(ax, hdat["RPRIME_K"], residual, True, False, True,
                   plot_old_candidate=True)
     # cand = np.where((hdat["RPRIME_K"]>0) & (residual>-9) & (hdat["RPRIME_K"]<4) & (residual<(-0.75/2)))[0]
+    # print("Plot",cand)
     # ax.plot(hdat["RPRIME_K"][cand], residual[cand], 'o', mfc="none", mew=1.5,
     #         mec=cand_color, label="Candidate Multiple")
     ax.axvline(4,color="Grey",zorder=-111)
@@ -245,7 +304,9 @@ def paper_plot(abs_r,dmod):
     #ax = plt.subplot2grid((3,1),(2,0),rowspan=1)
     color_mag.setup_axes(ax,"(r'-K)",r"M$_{r'}$ - M$_{r'}$(Main Sequence)",[0,6.75,0.9,-2.49])
     plt.subplots_adjust(hspace=0)
-    plot_binaries(ax, hdat["RPRIME_K"], residual, True)
+    plot_binaries(ax, hdat["RPRIME_K"], residual, True,
+                  plot_candidate=True,
+                  plot_old_candidate=False)
     print(len(np.where(residual>-1)[0]))
     leg = ax.legend(loc=1, numpoints=1,borderaxespad=0)
     leg.get_frame().set_alpha(1)
@@ -285,7 +346,7 @@ def paper_plot_gaia(abs_g, color, dmod,
                         extents)
 
     # add spectral types in Gaia colors
-    add_gaia_spts.add_gaia_spts(ax)
+    add_gaia_spts.add_gaia_spts(ax,texty=-1.4)
 
     plot_binaries(ax, color, abs_g, True,False,False, plot_single=False,
                   plot_old_candidate=False,
@@ -312,7 +373,7 @@ def paper_plot_gaia(abs_g, color, dmod,
                     r"M$_{G}$ - M$_{G}$(Main Sequence)",
                     extents)
     plt.subplots_adjust(hspace=0)
-    plot_binaries(ax, color, residual, True, False, False,
+    plot_binaries(ax, color, residual, True, False, True,
                   plot_single=plot_single,
                   plot_old_candidate=True,
                   plot_gaia_candidate=plot_gaia_candidate)
@@ -337,7 +398,7 @@ def paper_plot_gaia(abs_g, color, dmod,
                     extents)
     plt.subplots_adjust(hspace=0)
     plot_binaries(ax, color, residual, True,plot_single=plot_single,
-                  plot_old_candidate=plot_old_candidate,
+                  plot_old_candidate=False,
                   plot_gaia_candidate=plot_gaia_candidate)
     print(len(np.where(residual>-1)[0]))
     leg = ax.legend(loc=1, numpoints=1,borderaxespad=0)
@@ -367,25 +428,9 @@ def compute_new_rpmK_binaries():
     # Old binaries
     old_cand = calc_old_binaries()
 
-    # New binaries with Gaia parallaxes where possible
-    gaia_plx = np.zeros(len(hdat))*np.nan
-    # good_plx = gaia["Plx"].mask==False
-    # Only want to use the Gaia parallax when it meets the quality criteria!
-    good_plx = ((gaia_tab["GAIA_QUAL"]=="True")
-                & (gaia_tab["GAIA_QUAL"].mask==False))
+    # New old_binaries
+    new_cand = calc_new_binaries()
 
-    gaia_plx[gaia["HYADES_IDX"][good_plx]] = gaia["Plx"][good_plx]
-
-    gaia_dist = 1000/gaia_plx
-
-    dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
-    dmod[np.isfinite(gaia_plx)] = 5 * np.log10(gaia_dist[np.isfinite(gaia_plx)]) - 5
-    abs_r = hdat["RPRIME"] - dmod
-    abs_r[hdat["RPRIME"]<-9998] = -9999
-
-    new_residual = calc_residual(abs_r,dmod)
-    new_cand = ((hdat["RPRIME_K"]>0) & (new_residual>-9) &
-                (hdat["RPRIME_K"]<4) & (new_residual<(-0.75/2)))
 
     remove_candidates = np.where((old_cand==True) & (new_cand==False))[0]
     remove_final = np.copy(remove_candidates)
@@ -448,6 +493,18 @@ def gaia_binaries_plot():
     # plt.savefig("/home/stephanie/Dropbox/plots_for_sharing/binary_cmd_praesepe.png",
     #             bbox_inches="tight"))    plt.close("all")
     # plt.show()
+
+
+    gaia_plx = np.zeros(len(hdat))*np.nan
+    good_plx = gaia["Plx"].mask==False
+    # Jason used all Gaia parallaxes
+
+    gaia_plx[gaia["HYADES_IDX"][good_plx]] = gaia["Plx"][good_plx]
+
+    gaia_dist = 1000/gaia_plx
+
+    dmod = 5 * np.log10(hdat["DISTANCE"]) - 5
+    dmod[np.isfinite(gaia_plx)] = 5 * np.log10(gaia_dist[np.isfinite(gaia_plx)]) - 5
 
     abs_g = gaia["Gmag"] - dmod
     bprp = gaia["BPmag"] - gaia["RPmag"]
